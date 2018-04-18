@@ -43,7 +43,7 @@ class ViewController: UIViewController {
         globalQueue.setSpecific(key: globalQueueKey, value: DispatchTaskType.global.rawValue)
         
         
-        testSyncTaskNestedInSameConcurrentQueue();
+        testSyncTaskNestedInOtherSerialQueue();
         
     }
 
@@ -154,5 +154,55 @@ class ViewController: UIViewController {
             print("--->serialQueue sync task\n")
         }
     }
+    
+    
+    /// 栅栏任务
+    func barrierTask() {
+        let queue = concurrentQueue
+        let barrierTask = DispatchWorkItem(flags: .barrier) {
+            print("\nbarrierTask--->")
+            self.printCurrentThread(with: "barrierTask")
+            print("--->barrierTask\n")
+        }
+        
+        printCurrentThread(with: "start test")
+        
+        queue.async {
+            print("\nasync task1--->")
+            self.printCurrentThread(with: "async task1")
+            print("--->async task1\n")
+        }
+        queue.async {
+            print("\nasync task2--->")
+            self.printCurrentThread(with: "async task2")
+            print("--->async task2\n")
+        }
+        queue.async {
+            print("\nasync task3--->")
+            self.printCurrentThread(with: "async task3")
+            print("--->async task3\n")
+        }
+        
+        queue.async(execute: barrierTask) // 栅栏任务
+        
+        queue.async {
+            print("\nasync task4--->")
+            self.printCurrentThread(with: "async task4")
+            print("--->async task4\n")
+        }
+        queue.async {
+            print("\nasync task5--->")
+            self.printCurrentThread(with: "async task5")
+            print("--->async task5\n")
+        }
+        queue.async {
+            print("\nasync task6--->")
+            self.printCurrentThread(with: "async task6")
+            print("--->async task6\n")
+        }
+        printCurrentThread(with: "end test")
+    }
+
+    
 }
 
